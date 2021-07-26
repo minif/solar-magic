@@ -1,7 +1,7 @@
 /**
  * ======================================================
  *                     Solar Magic
- *                      Minif 2020
+ *                   Minif 2020-2021
  * ======================================================
  * A tool used for the modification of level files for 
  * the game Soap Mans World. Currently implements the 
@@ -9,10 +9,10 @@
  * 1 and 2, and to change the graphics and actions for 
  * each tile. 
  * ======================================================
- * Developed: October 2020
- * Version: 1.0
+ * Developed: January 2021
+ * Version: 1.1
  * Distribution: Public Build
- * Soap Man's World level file compatability: v0
+ * Soap Man's World level file compatability: v1
  * ======================================================
  */
 
@@ -35,8 +35,8 @@ import javax.swing.JPanel;
 
 import solarMagic.Window.panel;
 
-public class Options extends JFrame {
-	private static final long serialVersionUID = 1L;
+public class Options extends JFrame {							//The options menu.
+	private static final long serialVersionUID = 1L;			
 	byte[] levelOptions;
 	String filePath;
 	BufferedImage[][] graphics;
@@ -46,15 +46,15 @@ public class Options extends JFrame {
 	JFormattedTextField[] gfxSettings = new JFormattedTextField[8];
 	JFormattedTextField screenSize;
 	
-	short[][] layer1Tiles;
+	short[][][][] layer1Tiles;
 	byte layer1Size;
 	
 	String[] tileNames = {
 		"FG 1", "FG 2", "BG 1", "BG 2", "SP 1", "SP 2", "SP 3", "SP 4"
 	};
 	
-	public Options(BufferedImage[][] gfx, byte[] options, String path, short[][] layer1, byte screens) {
-		levelOptions = options;
+	public Options(BufferedImage[][] gfx, byte[] options, String path, short[][][][] layer1, byte screens) {
+		levelOptions = options;									//Set up stuff
 		graphics = gfx;
 		filePath = path;
 		layer1Tiles = layer1;
@@ -83,8 +83,8 @@ public class Options extends JFrame {
 		this.setSize(250,250);
 	}
 	
-	public JButton createButton(String action, String text) {
-		JButton button = new JButton(text);
+	public JButton createButton(String action, String text) {	//Used for setting up the menu.
+		JButton button = new JButton(text);						//Mostly to avoid copy and paste code
 		ActionListener menuAction = new buttonAction();
 		button.setActionCommand(action);
 		button.addActionListener(menuAction);
@@ -99,13 +99,13 @@ public class Options extends JFrame {
 	}
 	
 	public void loadGraphics(int page, int fileID) throws IOException {
-		BufferedImage image;
-		image = ImageIO.read(new File(filePath + "/graphics/gfx" + fileID + ".png"));
-		for (int i=0; i<8; i++) for (int j=0; j<8; j++) graphics[page][(i*8)+j] = image.getSubimage(j*16, i*16, 16, 16);
+		BufferedImage image;									//Load graphics if changed and store in graphics buffer
+		image = ImageIO.read(new File(filePath + "/gfxdata/gfx" + fileID + ".png"));
+		for (int i=0; i<8; i++) for (int j=0; j<16; j++) graphics[page][(i*16)+j] = image.getSubimage(j*8, i*8, 8, 8);
 	}
 	
 	
-	public void saveSettings() {
+	public void saveSettings() {								//Save settings to level options
 		int gfxfile;
 		for (int i=0; i<8; i++) {
 			gfxfile = Integer.parseInt(gfxSettings[i].getText());
@@ -114,7 +114,10 @@ public class Options extends JFrame {
 					loadGraphics(i,gfxfile);
 					levelOptions[i+1] = (byte)gfxfile;
 				} catch (IOException e) {
-					System.out.println("Graphics File: " + gfxfile + " does not exist in the /graphics/ folder");
+					DialogueMessage message = new DialogueMessage();
+					message.addLine("Issue with loadin Graphics File: " + gfxfile);
+					message.addLine("Make sure it is in the  /graphics/ folder!");
+					message.showDialogue();
 					gfxSettings[i].setValue(levelOptions[i+1]);
 				}
 			} else {
@@ -127,22 +130,20 @@ public class Options extends JFrame {
 		if (newScreenSize != levelOptions[0x0A]) {
 			if (newScreenSize < 0x20 && newScreenSize > 0) {
 				
-				short[] tempLayer1;
-				for (int rows = 0; rows <layer1Tiles.length; rows++) {
-					tempLayer1 = new short[newScreenSize*16];
-					for (int newCols=0; newCols<tempLayer1.length; newCols++) {
-						if (layer1Tiles[rows].length > newCols) {
-							tempLayer1[newCols] = layer1Tiles[rows][newCols];
-						}
+				
+				short[][][] tempLayer1 = new short[newScreenSize][32][16];
+				for (int screens = 0; screens < tempLayer1.length; screens++) {
+					if (layer1Tiles[0].length > screens) {
+						tempLayer1[screens] = layer1Tiles[0][screens];
 					}
-					layer1Tiles[rows] = tempLayer1;
 				}
+				
+				layer1Tiles[0] = tempLayer1;
 				
 				levelOptions[0x0A] = newScreenSize;
 				
 			} else screenSize.setValue(levelOptions[0x0A]);
 		}
-		//layer1Tiles = new short[32][128];
 		
 		levelView.repaint();
 	}

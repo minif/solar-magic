@@ -1,7 +1,7 @@
 /**
  * ======================================================
  *                     Solar Magic
- *                      Minif 2020
+ *                   Minif 2020-2021
  * ======================================================
  * A tool used for the modification of level files for 
  * the game Soap Mans World. Currently implements the 
@@ -9,10 +9,10 @@
  * 1 and 2, and to change the graphics and actions for 
  * each tile. 
  * ======================================================
- * Developed: October 2020
- * Version: 1.0
+ * Developed: January 2021
+ * Version: 1.1
  * Distribution: Public Build
- * Soap Man's World level file compatability: v0
+ * Soap Man's World level file compatability: v1
  * ======================================================
  */
 

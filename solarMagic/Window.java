@@ -1,7 +1,7 @@
 /**
  * ======================================================
  *                     Solar Magic
- *                      Minif 2020
+ *                   Minif 2020-2021
  * ======================================================
  * A tool used for the modification of level files for 
  * the game Soap Mans World. Currently implements the 
@@ -9,12 +9,13 @@
  * 1 and 2, and to change the graphics and actions for 
  * each tile. 
  * ======================================================
- * Developed: October 2020
- * Version: 1.0
+ * Developed: January 2021
+ * Version: 1.1
  * Distribution: Public Build
- * Soap Man's World level file compatability: v0
+ * Soap Man's World level file compatability: v1
  * ======================================================
  */
+
 
 package solarMagic;
 
@@ -48,12 +49,25 @@ public class Window extends JFrame {							//The main window class.
 	
 	int scroll = 0;												//The scroll, or x offset
 	
+	int selectedSprite = -1;
+	int ssOffx, ssOffy; 										//Used for sprite selection and dragging
+	
+	final String[] Information = {								//About Solar Magic
+			"Solar Magic v1.1 (01-2021)",
+			"2020-2021, Minif",
+			"Compatable Level Versions: 1",
+			"Public 2020-2021 Build",
+			"Released (07-2021)"
+	};
+	
 	final String[][] menuButtons = {							//A table that houses multiple menu buttons, with action and graphic data.
 			//action, image
 			{"load","1"},
 			{"save","0"},
+			{"SPEdit","6"},
 			{"FGEdit","3"},
 			{"BGEdit","4"},
+			{"addSp","7"},
 			{"tileSelect","2"},
 			{"options","5"},
 	};
@@ -75,6 +89,7 @@ public class Window extends JFrame {							//The main window class.
 		footerBar.add(createButton("scrollr4", ">"));
 		footerBar.add(createButton("scrollr32", ">>>"));
 		footerBar.add(message);
+		footerBar.add(createButton("about", "About Solar Magic"));
 		
 		add(buttonBar, BorderLayout.NORTH);						//Add the 3 views to the window
 		add(levelView, BorderLayout.CENTER);
@@ -136,6 +151,64 @@ public class Window extends JFrame {							//The main window class.
 		}
 	}
 	
+	public void selectSprite(MouseEvent e) {
+		if (currentLevel != null) {								//Make sure the level exists.
+			int x= e.getPoint().x/16;							//Get the x and y position of the point
+			int y= e.getPoint().y/16;
+			
+			x+=scroll;											//Based on scroll
+			
+			Sprite spriteToIdentify;
+			short[][] spriteSize;
+			
+			selectedSprite = -1;
+			
+			
+			selectionLoop:										//Loop through all sprites onscreen to see if mouse is over
+			for (int i=currentLevel.sprites.size()-1; i>=0; i--) {
+				spriteToIdentify = currentLevel.sprites.get(i);
+				spriteSize = spriteToIdentify.getGraphic();
+				
+				int posX = (spriteToIdentify.xPos);
+				int posY = (spriteToIdentify.yPos);				//Also loop through all sprite tiles belonging to sprite
+				
+				for (int tileX = 0; tileX < spriteSize.length; tileX++) {
+					for (int tileY = 0; tileY < spriteSize[0].length; tileY++) {
+						int drawX = posX + (tileX/2);
+						int drawY = posY - (tileY/2);
+						
+						if (drawX == x && drawY == y) {
+							if (e.getButton() == 3 && spriteToIdentify.spriteType !=95) {
+								selectedSprite = -1;
+								currentLevel.sprites.remove(i);
+								levelView.repaint();
+							} else {
+								selectedSprite = i;
+								ssOffx = (tileX/2);
+								ssOffy = (tileY/2);
+							}
+							break selectionLoop;
+						}
+					}
+				}
+			}
+		}	
+	}
+	
+	public void updateSpritePos(MouseEvent e) {
+		if (currentLevel != null) {								//Make sure the level exists.
+			int x= e.getPoint().x/16;							//Get the x and y position of the point
+			int y= e.getPoint().y/16;
+			x+=scroll;											//Add the scroll to the x position							//Repaint
+			if (selectedSprite != -1) {
+				Sprite spriteToMove = currentLevel.sprites.get(selectedSprite);
+				spriteToMove.xPos = x-ssOffx;
+				spriteToMove.yPos = y+ssOffy;
+				levelView.repaint();
+			}
+		}
+	}
+	
 	public void loadLevel() {									//Called when the "Load Level" button is clicked.
 		JFileChooser fileC = new JFileChooser();				//Open "Choose File" Prompt
 		fileC.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -152,7 +225,7 @@ public class Window extends JFrame {							//The main window class.
 			
 			scroll=0;											//Reset Scroll
 			
-			if (currentLevel.valid) {							//Mace sure the level loaded. If so, set the level view.
+			if (currentLevel.valid) {							//Make sure the level loaded. If so, set the level view.
 				currentLevel.setLevelView(levelView);
 			} else {
 				currentLevel = null;
@@ -179,16 +252,32 @@ public class Window extends JFrame {							//The main window class.
 		}
 	}
 	
+	public void addSp() {										//Called when a sub-window is needed
+		if (currentLevel != null) {
+			DialogueMessage prompt = new DialogueMessage();
+			prompt.prepareForAddingSprites(scroll, currentLevel.sprites, currentLevel.levelInformation, levelView);
+			prompt.showDialogue();
+		}
+	}
+	
+	public void aboutView() {
+		DialogueMessage prompt = new DialogueMessage();
+		for (int i=0; i<Information.length; i++) prompt.addLine(Information[i]);
+		prompt.setTitle("About Solar Magic");
+		prompt.showDialogue();
+	}
+	
 	public void selectLayer(int layer) {						//Called when changing the layer being edited
 		selectedLayer = (byte) layer;
-		message.setText("Editing Layer " + selectedLayer);
+		if (layer==0) message.setText("Editing Sprite Layer ");
+		else message.setText("Editing Layer " + selectedLayer);
 	}
 	
 	public void scrollView(int Direction) {						//Called when the view is being scrolled
 		if (currentLevel != null) {
 			scroll+=Direction;
 			if (scroll < 0) scroll = 0;
-			else if (scroll >= currentLevel.layer1[0].length) scroll = currentLevel.layer1[0].length -1;
+			else if (scroll >= currentLevel.layer1[0].length*16) scroll = (currentLevel.layer1[0].length*16) -1;
 			
 			levelView.repaint();
 		}
@@ -204,9 +293,9 @@ public class Window extends JFrame {							//The main window class.
 			else if (buttonPressed.equals("tileSelect")) showToolbar(1);
 			else if (buttonPressed.equals("FGEdit")) selectLayer(1);
 			else if (buttonPressed.equals("BGEdit")) selectLayer(2);
+			else if (buttonPressed.equals("SPEdit")) selectLayer(0);
 			else if (buttonPressed.equals("options")) showToolbar(2);
-			else if (buttonPressed.equals("scrolll")) scrollView(-8);
-			else if (buttonPressed.equals("scrollr")) scrollView(8);
+			else if (buttonPressed.equals("addSp")) addSp();
 		}
 	}
 	
@@ -217,18 +306,25 @@ public class Window extends JFrame {							//The main window class.
 			else if (buttonPressed.equals("scrollr4")) scrollView(4);
 			else if (buttonPressed.equals("scrolll32")) scrollView(-32);
 			else if (buttonPressed.equals("scrollr32")) scrollView(32);
+			else if (buttonPressed.equals("about")) aboutView();
 		}
 	}
 	
 	class MouseMotionAction extends MouseMotionAdapter {		//Called whenever the mouse is dragged
 		public void mouseDragged(MouseEvent e) {
-			drawTile(e);
+			switch (selectedLayer) {
+			case 0: updateSpritePos(e); break;
+			default: drawTile(e); break;
+			}
         }
 	}
 	
 	class MouseAction extends MouseAdapter {					//Called whenever the mouse is clicked
 		public void mousePressed(MouseEvent e) {
-			drawTile(e);
+			switch (selectedLayer) {
+			case 0: selectSprite(e); break;
+			default: drawTile(e); break;
+			}
         }
 	}
 	
@@ -245,12 +341,10 @@ public class Window extends JFrame {							//The main window class.
 			super.paintComponent(g);
 			
 			if (currentLevel != null) {							//Make sure the level exists
-				
-				currentLevel.loadHardCodedGraphics();			//Make sure Soapman's graphics are properly loaded
 				currentLevel.screens = currentLevel.levelInformation[0xA];
 				
-				int levelHeight = currentLevel.layer1.length;	//Set variables for screen size
-				int levelWidth = currentLevel.layer1[0].length;
+				int levelHeight = 32;	//Set variables for screen size
+				int levelWidth = currentLevel.screens;
 				
 				int[] inx;
 				short[][] gfxToDraw;
@@ -267,21 +361,32 @@ public class Window extends JFrame {							//The main window class.
 						int posX = (i%16)*16+(scr*256)-(scroll*16);
 						int posY = (int)Math.floor(i/16)*16;
 						
-						if (posX > -16 && posX < screenSizeX) 
-						g.drawImage(currentLevel.gfx[inx[1]][inx[0]], posX, posY , this);
+						if (posX > -16 && posX < screenSizeX) {
+							g.drawImage(currentLevel.gfx[inx[1]][inx[0]], posX, posY , this);
+							g.drawImage(currentLevel.gfx[inx[3]][inx[2]], posX+8, posY , this);
+							g.drawImage(currentLevel.gfx[inx[5]][inx[4]], posX, posY+8 , this);
+							g.drawImage(currentLevel.gfx[inx[7]][inx[6]], posX+8, posY+8 , this);
+						}
 					}
 				}
 				
 				//Draw layer 1 tiles
-				for (int i=0; i<(levelWidth)*levelHeight; i++) {
-					inx = currentLevel.getTileIndex((int)Math.floor((i)/levelWidth),(i%levelWidth));
-					
-					int posX = ((i%levelWidth)-scroll)*16;
-					int posY = (int)Math.floor(i/levelWidth)*16;
-					
-					if (posX > -16 && posX < screenSizeX) 
-					
-					g.drawImage(currentLevel.gfx[inx[1]][inx[0]], posX, posY , this);
+				for (int s=0; s<levelWidth; s++) {
+					for (int y=0; y<levelHeight; y++) {
+						for (int x=0; x<16; x++) {
+							inx = currentLevel.getTileIndex(s,y,x);
+							
+							int posX = (((s*16)+x)-scroll)*16;
+							int posY = y*16;
+							
+							if (posX > -16 && posX < screenSizeX) {
+								g.drawImage(currentLevel.gfx[inx[1]][inx[0]], posX, posY , this);
+								g.drawImage(currentLevel.gfx[inx[3]][inx[2]], posX+8, posY, this);
+								g.drawImage(currentLevel.gfx[inx[5]][inx[4]], posX, posY+8, this);
+								g.drawImage(currentLevel.gfx[inx[7]][inx[6]], posX+8, posY+8, this);
+							}
+						}
+					}
 				}
 				
 				//Draw sprites (only one is soapman, but allows room for expansion)
@@ -296,15 +401,15 @@ public class Window extends JFrame {							//The main window class.
 					
 					for (int tileX = 0; tileX < gfxToDraw.length; tileX++) {
 						for (int tileY = 0; tileY < gfxToDraw[0].length; tileY++) {
-							int drawX = posX + (tileX * 16);
-							int drawY = posY - (tileY * 16);
+							int drawX = posX + (tileX * 8);
+							int drawY = posY - (tileY * 8)+8;
 							
 							g.drawImage(currentLevel.gfx[sp][gfxToDraw[tileX][tileY]], drawX, drawY , this);
 						}
 					}
 				}
 				
-				g.drawRect(0, 0, (levelWidth-scroll)*16, (levelHeight)*16);	//Draw boundry around level
+				g.drawRect(0, 0, ((levelWidth*16)-scroll)*16, (levelHeight)*16);	//Draw boundry around level
 			}
 		}
 	}
