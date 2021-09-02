@@ -45,6 +45,11 @@ public class Window extends JFrame {							//The main window class.
 	panel levelView = new panel();
 	LevelData currentLevel;
 	JLabel message;												//Level editing message (tells what layer is being edited)
+	JButton lvl;
+	String lvlpath;
+	
+	static int level = 105;
+	
 	byte selectedLayer = 1;										//Selected layer
 	
 	int scroll = 0;												//The scroll, or x offset
@@ -53,11 +58,11 @@ public class Window extends JFrame {							//The main window class.
 	int ssOffx, ssOffy; 										//Used for sprite selection and dragging
 	
 	final String[] Information = {								//About Solar Magic
-			"Solar Magic v1.1 (01-2021)",
+			"Solar Magic v1.2 (07-2021)",
 			"2020-2021, Minif",
-			"Compatable Level Versions: 1",
+			"Compatable Level Versions: 1-2",
 			"Public 2020-2021 Build",
-			"Released (07-2021)"
+			"Released (09-2021)"
 	};
 	
 	final String[][] menuButtons = {							//A table that houses multiple menu buttons, with action and graphic data.
@@ -84,12 +89,16 @@ public class Window extends JFrame {							//The main window class.
 		
 		message = new JLabel("Editing Layer " + selectedLayer);	//Creates the message.
 		
+		lvl = createButton("lvl", "---");
+		footerBar.add(lvl);
+		
 		footerBar.add(createButton("scrolll32", "<<<"));		//Add objects to the footer
 		footerBar.add(createButton("scrolll4", "<"));
 		footerBar.add(createButton("scrollr4", ">"));
 		footerBar.add(createButton("scrollr32", ">>>"));
 		footerBar.add(message);
 		footerBar.add(createButton("about", "About Solar Magic"));
+		
 		
 		add(buttonBar, BorderLayout.NORTH);						//Add the 3 views to the window
 		add(levelView, BorderLayout.CENTER);
@@ -221,18 +230,34 @@ public class Window extends JFrame {							//The main window class.
 			}
 			
 			File file = fileC.getSelectedFile();				//Create new level data
-			currentLevel = new LevelData(file.getAbsolutePath(), 105);
-			
-			scroll=0;											//Reset Scroll
-			
-			if (currentLevel.valid) {							//Make sure the level loaded. If so, set the level view.
-				currentLevel.setLevelView(levelView);
-			} else {
-				currentLevel = null;
-			}
-			
-			levelView.repaint();
+			lvlpath = file.getAbsolutePath();
+			openLevel();
 		}
+	}
+	
+	public void switchLevel() {									//Called when the "Load Level" button is clicked.
+		if (lvlpath != null) {
+			DialogueMessage prompt = new DialogueMessage();
+			prompt.prepareForNewLevel(level,this);
+			prompt.showDialogue();
+		}
+	}
+	
+	public void openLevel() {
+		if (currentLevel != null) {							//Close level if already opened
+			currentLevel.close();
+			currentLevel = null;
+		}
+		
+		currentLevel = new LevelData(lvlpath, level);
+		scroll=0;											//Reset Scroll
+		if (currentLevel.valid) {							//Make sure the level loaded. If so, set the level view.
+			currentLevel.setLevelView(levelView);
+		} else {
+			currentLevel = null;
+		}
+		levelView.repaint();
+		lvl.setText(level+"");
 	}
 	
 	public void saveLevel() {									//Called when the save button is hit
@@ -307,6 +332,7 @@ public class Window extends JFrame {							//The main window class.
 			else if (buttonPressed.equals("scrolll32")) scrollView(-32);
 			else if (buttonPressed.equals("scrollr32")) scrollView(32);
 			else if (buttonPressed.equals("about")) aboutView();
+			else if (buttonPressed.equals("lvl")) switchLevel();
 		}
 	}
 	

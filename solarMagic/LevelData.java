@@ -31,7 +31,7 @@ import solarMagic.Window.panel;
 
 public class LevelData {							//The main level data class
 	
-	byte solarMagicVersion = 1;						//Check this against level
+	byte solarMagicVersion = 2;						//Check this against level
 	
 	byte solarMagicLowestCompatableVersion = 1;		//If a major change occurs, this forces older versions to not be compatable.
 	
@@ -150,7 +150,6 @@ public class LevelData {							//The main level data class
 	
 	private void loadLevelFromFile() {				//Load levels from file
 		try {
-			@SuppressWarnings("resource")
 			LevelFile sf = new LevelFile(levelPath);
 			
 			sf.checkHeader(header);
@@ -215,6 +214,7 @@ public class LevelData {							//The main level data class
 			DialogueMessage message = new DialogueMessage();
 			message.addLine("Level " +levelNumber + " does not exist. ");
 			message.addLine(levelPath);
+			message.addLine("Tip: Copy and paste existing level file to create level.");
 			message.addLine(e.getMessage());
 			message.showDialogue();
 			valid = false;

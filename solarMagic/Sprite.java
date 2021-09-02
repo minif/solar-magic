@@ -50,6 +50,13 @@ public class Sprite {	//Sprite object
 			returnedGraphics[0][1] = 0x00; 	
 			returnedGraphics[1][1] = 0x01; 	
 			break;
+		case 2:
+			returnedGraphics = new short[2][2];
+			returnedGraphics[0][0] = 0x1A; 	
+			returnedGraphics[1][0] = 0x1B; 	
+			returnedGraphics[0][1] = 0x0A; 	
+			returnedGraphics[1][1] = 0x0B; 
+			break;
 		case 95:
 			returnedGraphics = new short[2][4];
 			returnedGraphics[0][0] = 0x14; 	//Bottom Half

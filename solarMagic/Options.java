@@ -45,6 +45,8 @@ public class Options extends JFrame {							//The options menu.
 	JButton saveButton;
 	JFormattedTextField[] gfxSettings = new JFormattedTextField[8];
 	JFormattedTextField screenSize;
+	JFormattedTextField door1;
+	JFormattedTextField door2;
 	
 	short[][][][] layer1Tiles;
 	byte layer1Size;
@@ -60,11 +62,15 @@ public class Options extends JFrame {							//The options menu.
 		layer1Tiles = layer1;
 		layer1Size = screens;
 		
-		optionsPanel = new JPanel(new GridLayout(9,2));
+		optionsPanel = new JPanel(new GridLayout(11,2));
 		
 		for (int i=0; i<8; i++) gfxSettings[i] = createField(i+1);
 		
 		screenSize = createField(0x0A);
+		
+		door1 = createField(0x0C);
+		
+		door2 = createField(0x0D);
 		
 		for (int i=0; i<8; i++) {
 			optionsPanel.add(new JLabel(tileNames[i]));
@@ -73,6 +79,12 @@ public class Options extends JFrame {							//The options menu.
 		
 		optionsPanel.add(new JLabel("Level Size"));
 		optionsPanel.add(screenSize);
+		
+		optionsPanel.add(new JLabel("Exit 1"));
+		optionsPanel.add(door1);
+		
+		optionsPanel.add(new JLabel("Exit 2"));
+		optionsPanel.add(door2);
 		
 		saveButton = createButton("save", "Save");
 		
@@ -144,6 +156,11 @@ public class Options extends JFrame {							//The options menu.
 				
 			} else screenSize.setValue(levelOptions[0x0A]);
 		}
+		
+		byte newDoor = (byte)Integer.parseInt((door1.getText())) ;
+		levelOptions[0x0C] = newDoor;
+		newDoor = (byte)Integer.parseInt((door2.getText())) ;
+		levelOptions[0x0D] = newDoor;
 		
 		levelView.repaint();
 	}

@@ -42,6 +42,7 @@ public class DialogueMessage extends JFrame {
 	JButton confirm, cancel;
 	JPanel footerBar;
 	int specificItems;
+	Window dataa;
 	
 	panel levelView;
 	
@@ -71,7 +72,7 @@ public class DialogueMessage extends JFrame {
 		this.setTitle("Add Sprite");							//Specific message for sprite window
 		
 		addLine("Enter an ID to add:");
-		addLine("0=enemy, 1=goal");
+		addLine("0=enemy, 1=goal, 2=enemy2");
 		
 		specificItems = 1;
 		spInput = new JFormattedTextField();
@@ -93,6 +94,27 @@ public class DialogueMessage extends JFrame {
 		levelView = view;
 	}
 	
+	public void prepareForNewLevel(int lvl, Window data) {
+		this.setTitle("Change Level");
+		addLine("Enter a level to change to:");
+		specificItems = 2;
+		spInput = new JFormattedTextField();
+		spInput.setValue(new Integer(lvl));						//Require an integer to be entered.
+		spInput.setColumns(2);
+		
+		cancel = new JButton("Cancel");
+		ActionListener close = new CloseAction();
+		cancel.setActionCommand("close");
+		cancel.addActionListener(close);
+		
+		dialogueType = 2;
+		
+		footerBar.add(cancel);
+		confirm.setActionCommand("confirm");
+		
+		dataa = data;
+	}
+	
 	public void addLine(String line) {							//I wonder what it does?
 		description.add(line);
 	}
@@ -102,6 +124,8 @@ public class DialogueMessage extends JFrame {
 		case 1: 
 			messages.add(spInput);
 			break;
+		case 2:
+			messages.add(spInput);
 		} 
 	}
 	
@@ -136,6 +160,12 @@ public class DialogueMessage extends JFrame {
 				message.showDialogue();
 			}
 			break;
+		case 2: 
+			Window.level = (Integer)spInput.getValue();
+			if (Window.level>255) Window.level = 255;
+			if (Window.level<0) Window.level = 0;
+			dataa.openLevel();
+			
 		}
 	}
 	
