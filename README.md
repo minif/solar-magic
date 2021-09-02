@@ -18,8 +18,11 @@ This will launch a new window that should briefly display "Bathroom Co. Presents
 #### Controlling the game
 
 Use the arrow keys to move Soapman around.
+
 Use the space key to jump.
+
 Use the up arrow to use an exit.
+
 Use the escape key to reset.
 
 ## Editing Levels
@@ -78,7 +81,8 @@ The `<<<`, `<`, `>`, and `>>>` buttons are used to scroll the view.
 The number in the bottom left corner denotes the current level. Click it to change to a different level. Currently, the ability
 to create levels has not been implemented (and probably won't be), so adding additional levels involves duplicating `./level/levelxxx.sml`
 
->Notice: Do not use the file under `./level/levelxxx.sml`. This file is for compatibility purposes and thus does not work.
+>Notice: There is a 
+>difference between `levels` and `level`. Do not use the file under `./levels/levelxxx.sml`. This file is for compatibility purposes and thus does not work. 
 
 ## Compiling Notes
 This project is recommended to be built with JavaSE-1.8, however JavaSE-1.6 was tested to be fully functional. `solarMagic` and `assets` are
