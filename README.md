@@ -18,7 +18,9 @@ This will launch a new window that should briefly display "Bathroom Co. Presents
 #### Controlling the game
 
 Use the arrow keys to move Soapman around.
-Use the  `a` and `d` keys to pan the camera.
+Use the space key to jump.
+Use the up arrow to use an exit.
+Use the escape key to reset.
 
 ## Editing Levels
 Download `Solar Magic.jar` and double click it to open. 
